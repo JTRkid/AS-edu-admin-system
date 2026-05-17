@@ -114,6 +114,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
             score_record, _ = Score.objects.update_or_create(
                 student=sub.student,
                 section=question.section,
+                score_type='regular',
                 defaults={
                     'student_no': student_profile.student_no,
                     'student_name': sub.student.name,
@@ -123,6 +124,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
                     'section_no': question.section.section_no,
                     'section_name': question.section.title,
                     'score': score,
+                    'score_type': 'regular',
                     'source': 'auto_script',
                     'evaluator': f'教师批改:{request.user.name}',
                     'details': f'题目:{question.title} 答案:{sub.answer}',
@@ -235,6 +237,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
             Score.objects.update_or_create(
                 student_id=student_id,
                 section=section,
+                score_type='regular',
                 defaults={
                     'student_no': student_profile.student_no,
                     'student_name': student_profile.user.name,
@@ -244,6 +247,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
                     'section_no': section.section_no,
                     'section_name': section.title,
                     'score': total_score,
+                    'score_type': 'regular',
                     'source': 'auto_script',
                     'evaluator': f'教师批改:{request.user.name}',
                     'details': details,

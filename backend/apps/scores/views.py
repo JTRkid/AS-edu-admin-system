@@ -16,7 +16,7 @@ from .serializers import ScoreSerializer, ScoreSubmitSerializer
 class ScoreViewSet(viewsets.ModelViewSet):
     queryset = Score.objects.select_related('student', 'section', 'modified_by').all()
     serializer_class = ScoreSerializer
-    filterset_fields = ['section', 'chapter_no', 'section_no', 'class_name', 'source']
+    filterset_fields = ['section', 'chapter_no', 'section_no', 'class_name', 'source', 'score_type']
     search_fields = ['student_no', 'student_name', 'class_name']
     ordering_fields = ['student_no', 'student_name', 'class_name', 'chapter_no', 'section_no', 'score', 'created_at']
 
@@ -207,6 +207,8 @@ def score_submit_api(request):
 
     if existing:
         existing.score = data['score']
+        existing.score_type = 'experiment'
+        existing.source = 'experiment'
         existing.evaluator = data.get('evaluator', '')
         existing.details = str(data.get('details', ''))
         existing.original_score = existing.score
@@ -220,6 +222,7 @@ def score_submit_api(request):
             chapter_no=data['chapter_no'], chapter_name=data.get('chapter_name', ''),
             section_no=data['section_no'], section_name=data.get('section_name', ''),
             section=section, score=data['score'],
+            score_type='experiment', source='experiment',
             evaluator=data.get('evaluator', ''), details=str(data.get('details', '')),
         )
 

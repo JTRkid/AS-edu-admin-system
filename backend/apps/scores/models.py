@@ -7,6 +7,11 @@ class Score(models.Model):
         ('auto_script', '自动评分'),
         ('manual', '手动录入'),
         ('import', 'Excel导入'),
+        ('experiment', '实验成绩'),
+    )
+    SCORE_TYPE_CHOICES = (
+        ('regular', '总成绩'),
+        ('experiment', '实验成绩'),
     )
     student = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name='学生'
@@ -22,6 +27,7 @@ class Score(models.Model):
         'courses.Section', on_delete=models.CASCADE, verbose_name='所属节'
     )
     score = models.DecimalField(max_digits=6, decimal_places=2, verbose_name='成绩')
+    score_type = models.CharField(max_length=20, choices=SCORE_TYPE_CHOICES, default='regular', verbose_name='成绩类型')
     source = models.CharField(max_length=20, choices=SOURCE_CHOICES, default='auto_script', verbose_name='来源')
     evaluator = models.CharField(max_length=100, blank=True, verbose_name='评分机标识/教师')
     details = models.TextField(blank=True, verbose_name='评分详情')
@@ -41,7 +47,7 @@ class Score(models.Model):
         db_table = 'scores'
         verbose_name = '成绩'
         verbose_name_plural = '成绩'
-        unique_together = [('student', 'section')]
+        unique_together = [('student', 'section', 'score_type')]
         ordering = ['chapter_no', 'section_no', 'student_no']
 
     def __str__(self):

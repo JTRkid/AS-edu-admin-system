@@ -1,5 +1,13 @@
 <template>
   <div class="score-manage">
+    <!-- Score type tabs -->
+    <div class="score-type-tabs">
+      <el-radio-group v-model="scoreType" @change="onScoreTypeChange" size="default">
+        <el-radio-button value="regular">总成绩</el-radio-button>
+        <el-radio-button value="experiment">实验成绩</el-radio-button>
+      </el-radio-group>
+    </div>
+
     <div class="toolbar">
       <el-button type="primary" @click="openAdd">添加成绩</el-button>
       <el-button @click="exportScores">导出Excel</el-button>
@@ -42,7 +50,7 @@
       <el-table-column prop="score" label="成绩" sortable width="90" />
       <el-table-column prop="source" label="来源" width="100">
         <template #default="{ row }">
-          <el-tag :type="row.source==='auto_script'?'':row.source==='manual'?'warning':'info'" size="small">
+          <el-tag :type="row.source==='auto_script'?'':row.source==='manual'?'warning':row.source==='experiment'?'success':'info'" size="small">
             {{ sourceMap[row.source] || row.source }}
           </el-tag>
         </template>
@@ -69,6 +77,12 @@
     <!-- Add Score Dialog -->
     <el-dialog v-model="showAddDialog" title="添加成绩" width="480px">
       <el-form :model="addForm" label-width="80px">
+        <el-form-item label="成绩类型">
+          <el-radio-group v-model="addForm.score_type">
+            <el-radio value="regular">总成绩</el-radio>
+            <el-radio value="experiment">实验成绩</el-radio>
+          </el-radio-group>
+        </el-form-item>
         <el-form-item label="学生">
           <el-select v-model="addForm.student_id" filterable placeholder="搜索学号或姓名" style="width:100%">
             <el-option v-for="s in studentList" :key="s.user_id" :label="`${s.student_no} ${s.name} (${s.class_name})`" :value="s.user_id" />
@@ -125,24 +139,25 @@ const searchName = ref('')
 const filterSection = ref(null)
 const sectionTabs = ref([])
 const selectedScores = ref([])
+const scoreType = ref('regular')
 
 const showAddDialog = ref(false)
 const studentList = ref([])
 const sectionList = ref([])
-const addForm = reactive({ student_id: null, section_id: null, score: 0, details: '' })
+const addForm = reactive({ student_id: null, section_id: null, score: 0, details: '', score_type: 'regular' })
 
 const showModifyDialog = ref(false)
 const currentScore = ref(null)
 const newScore = ref(0)
 const modifyReason = ref('')
 
-const sourceMap = { auto_script: '自动评分', manual: '手动录入', import: 'Excel导入' }
+const sourceMap = { auto_script: '自动评分', manual: '手动录入', import: 'Excel导入', experiment: '实验成绩' }
 let searchTimer = null
 
 async function loadScores() {
   loading.value = true
   try {
-    const params = { page: page.value }
+    const params = { page: page.value, score_type: scoreType.value }
     if (searchKey.value) params.search = searchKey.value
     if (searchName.value) params.student_name = searchName.value
     if (filterSection.value) params.section = filterSection.value
@@ -155,7 +170,7 @@ async function loadScores() {
 
 async function loadSectionTabs() {
   try {
-    const res = await scoreAPI.list({})
+    const res = await scoreAPI.list({ score_type: scoreType.value })
     const all = extractList(res)
     const map = new Map()
     for (const s of all) {
@@ -173,6 +188,13 @@ async function loadSectionTabs() {
     }
     sectionTabs.value = [...map.values()].sort((a, b) => a.chapter_no - b.chapter_no || a.section_no - b.section_no)
   } catch (e) { /* ignore */ }
+}
+
+function onScoreTypeChange() {
+  filterSection.value = null
+  page.value = 1
+  loadScores()
+  loadSectionTabs()
 }
 
 function onSectionClick(sectionId) {
@@ -203,7 +225,7 @@ async function batchDelete() {
 
 async function openAdd() {
   showAddDialog.value = true
-  Object.assign(addForm, { student_id: null, section_id: null, score: 0, details: '' })
+  Object.assign(addForm, { student_id: null, section_id: null, score: 0, details: '', score_type: 'regular' })
   try {
     const [stuRes, secRes] = await Promise.all([
       studentAPI.list({}),
@@ -233,6 +255,7 @@ async function saveAddScore() {
       chapter_name: section?.chapter_title || '',
       section_name: section?.title || '',
       score: addForm.score,
+      score_type: addForm.score_type,
       source: 'manual',
       evaluator: '教师手动录入',
       details: addForm.details,
@@ -269,7 +292,7 @@ async function deleteScore(id) {
 }
 
 async function exportScores() {
-  try { await downloadFile('/scores/export_excel/', 'scores.xlsx') } catch (e) { ElMessage.error('导出失败') }
+  try { await downloadFile(`/scores/export_excel/?score_type=${scoreType.value}`, 'scores.xlsx') } catch (e) { ElMessage.error('导出失败') }
 }
 
 function downloadTemplate() {
@@ -296,6 +319,7 @@ onMounted(() => { loadScores(); loadSectionTabs() })
 
 <style scoped>
 .score-manage { max-width: 1200px; margin: 0 auto; }
+.score-type-tabs { margin-bottom: 16px; }
 .toolbar { margin-bottom: 16px; display: flex; gap: 8px; flex-wrap: wrap; }
 .chapter-tabs { margin-bottom: 14px; display: flex; gap: 8px; flex-wrap: wrap; }
 .search-bar { display: flex; margin-bottom: 16px; }
