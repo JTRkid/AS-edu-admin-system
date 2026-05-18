@@ -1,7 +1,11 @@
 <template>
   <div class="login-container">
+    <div class="login-bg"></div>
     <div class="login-card">
       <div class="login-header">
+        <div class="logo-icon">
+          <el-icon :size="40"><School /></el-icon>
+        </div>
         <h1>AS-edu-system</h1>
         <p>在线教学管理系统</p>
       </div>
@@ -98,16 +102,50 @@ async function handleLogin() {
 <style scoped>
 .login-container {
   height: 100vh; display: flex; align-items: center; justify-content: center;
-  background: #f0f2f5;
+  position: relative; overflow: hidden;
+  background:
+    #f5f7fa,
+    linear-gradient(0deg, rgba(225,233,245,.3) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(225,233,245,.3) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+.login-bg {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(255,214,208,.4) 0%, transparent 38%),
+    radial-gradient(circle at 100% 100%, rgba(255,232,212,.4) 0%, transparent 38%),
+    radial-gradient(circle at 0% 100%, rgba(199,236,255,.4) 0%, transparent 38%),
+    radial-gradient(circle at 100% 0%, rgba(199,236,255,.4) 0%, transparent 38%);
 }
 .login-card {
-  width: 400px; background: #fff; border-radius: 12px; padding: 48px 40px 36px;
-  box-shadow: 0 2px 12px rgba(0,0,0,.06);
+  width: 420px; background: rgba(255,255,255,.72); border-radius: 24px;
+  padding: 48px 44px 40px; position: relative; z-index: 1;
+  box-shadow: 0 8px 32px rgba(0,0,0,.08);
+  animation: scaleIn .5s ease-out;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,.25);
 }
 .login-header { text-align: center; margin-bottom: 36px; }
-.login-header h1 { font-size: 26px; color: #303133; font-weight: 600; margin-bottom: 8px; }
+.logo-icon {
+  width: 64px; height: 64px; border-radius: 16px;
+  background: #7cb9e8;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 16px; color: #fff;
+  animation: pulse 2s ease-in-out infinite;
+}
+.login-header h1 { font-size: 24px; color: #303133; font-weight: 700; margin-bottom: 6px; }
 .login-header p { font-size: 14px; color: #909399; }
 .login-form { margin-top: 8px; }
-.login-btn { width: 100%; height: 44px; font-size: 16px; letter-spacing: 4px; }
+.login-btn {
+  width: 100%; height: 46px; font-size: 16px; letter-spacing: 6px;
+  background: #7cb9e8; border: none;
+  color: #fff;
+  transition: all .3s ease;
+}
+.login-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(124,185,232,.45);
+}
 
 </style>

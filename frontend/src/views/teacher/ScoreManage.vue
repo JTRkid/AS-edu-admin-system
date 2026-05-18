@@ -320,11 +320,15 @@ onMounted(() => { loadScores(); loadSectionTabs() })
 
 <style scoped>
 .score-manage { max-width: 1200px; margin: 0 auto; }
-.score-type-tabs { margin-bottom: 16px; }
-.toolbar { margin-bottom: 16px; display: flex; gap: 8px; flex-wrap: wrap; }
-.chapter-tabs { margin-bottom: 14px; display: flex; gap: 8px; flex-wrap: wrap; }
-.search-bar { display: flex; margin-bottom: 16px; }
+.score-type-tabs { margin-bottom: 20px; }
+.toolbar { margin-bottom: 18px; display: flex; gap: 10px; flex-wrap: wrap; }
+.chapter-tabs { margin-bottom: 16px; display: flex; gap: 8px; flex-wrap: wrap; }
+.search-bar { display: flex; margin-bottom: 18px; }
 .table { width: 100%; }
-.pagination { margin-top: 16px; text-align: center; }
-.batch-bar { margin-top: 12px; padding: 8px 16px; background: #f0f9eb; border-radius: 6px; display: flex; align-items: center; gap: 12px; }
+.pagination { margin-top: 18px; text-align: center; }
+.batch-bar {
+  margin-top: 14px; padding: 10px 18px; background: #f0f9eb; border-radius: 8px;
+  display: flex; align-items: center; gap: 14px; border: 1px solid #d0ead0;
+  animation: slideUp .3s ease;
+}
 </style>

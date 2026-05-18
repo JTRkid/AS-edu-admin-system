@@ -199,8 +199,8 @@ onMounted(loadStudents)
 
 <style scoped>
 .student-manage { max-width: 1100px; margin: 0 auto; }
-.toolbar { margin-bottom: 16px; display: flex; align-items: center; }
-.search-bar { display: flex; margin-bottom: 16px; }
+.toolbar { margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+.search-bar { display: flex; margin-bottom: 18px; }
 .table { width: 100%; }
-.pagination { margin-top: 16px; text-align: center; }
+.pagination { margin-top: 18px; text-align: center; }
 </style>

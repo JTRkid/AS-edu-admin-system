@@ -72,4 +72,6 @@ onMounted(loadScores)
 <style scoped>
 .my-scores { max-width: 1100px; margin: 0 auto; }
 .card-header { display: flex; justify-content: space-between; align-items: center; }
+.score-green { color: #67c23a; font-weight: 700; font-size: 15px; }
+.score-red { color: #f56c6c; font-weight: 700; font-size: 15px; }
 </style>

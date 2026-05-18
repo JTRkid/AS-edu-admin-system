@@ -1,7 +1,9 @@
 <template>
   <div class="teacher-manage">
     <div class="toolbar">
-      <el-button type="primary" @click="showAddDialog = true">添加教师</el-button>
+      <el-button type="primary" @click="showAddDialog = true">
+        <el-icon style="margin-right:4px"><Plus /></el-icon>添加教师
+      </el-button>
     </div>
 
     <div class="search-bar">
@@ -12,62 +14,64 @@
         clearable
         style="width: 300px"
         @input="search"
+        class="search-input"
       />
     </div>
 
-    <el-table :data="teachers" border stripe v-loading="loading" class="table">
-      <el-table-column prop="teacher_no" label="教师号" sortable width="120" />
-      <el-table-column prop="name" label="姓名" sortable width="100" />
-      <el-table-column prop="department" label="部门" width="120" />
-      <el-table-column label="管理员" width="100">
-        <template #default="{ row }">
-          <el-tag :type="row.is_admin ? 'danger' : 'info'" size="small">
-            {{ row.is_admin ? '是' : '否' }}
-          </el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column label="状态" width="80">
-        <template #default="{ row }">
-          <el-tag :type="row.user?.is_active ? 'success' : 'danger'" size="small">
-            {{ row.user?.is_active ? '正常' : '禁用' }}
-          </el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column label="操作" min-width="280">
-        <template #default="{ row }">
-          <el-button v-if="!row.is_admin" size="small" type="success" @click="setAdmin(row)">设为管理员</el-button>
-          <el-button v-else size="small" type="warning" @click="revokeAdmin(row)">撤销管理员</el-button>
-          <el-button size="small" @click="resetPwd(row.user_id)">重置密码</el-button>
-          <el-button size="small" :type="row.user?.is_active ? 'danger' : 'success'" @click="toggleActive(row)">
-            {{ row.user?.is_active ? '禁用' : '启用' }}
-          </el-button>
-        </template>
-      </el-table-column>
-    </el-table>
-    <el-pagination
-      v-if="total > 20"
-      v-model:current-page="page"
-      :total="total"
-      :page-size="20"
-      layout="prev, pager, next"
-      @current-change="loadTeachers"
-      class="pagination"
-    />
+    <el-card shadow="never" class="table-card">
+      <el-table :data="teachers" stripe v-loading="loading" class="table">
+        <el-table-column prop="teacher_no" label="教师号" sortable width="120" />
+        <el-table-column prop="name" label="姓名" sortable width="100" />
+        <el-table-column prop="department" label="部门" width="120" />
+        <el-table-column label="管理员" width="100">
+          <template #default="{ row }">
+            <el-tag :type="row.is_admin ? 'danger' : 'info'" size="small" effect="dark">
+              {{ row.is_admin ? '是' : '否' }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="状态" width="80">
+          <template #default="{ row }">
+            <el-tag :type="row.user?.is_active ? 'success' : 'danger'" size="small" effect="dark">
+              {{ row.user?.is_active ? '正常' : '禁用' }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" min-width="280">
+          <template #default="{ row }">
+            <el-button v-if="!row.is_admin" size="small" type="success" @click="setAdmin(row)">设为管理员</el-button>
+            <el-button v-else size="small" type="warning" @click="revokeAdmin(row)">撤销管理员</el-button>
+            <el-button size="small" @click="resetPwd(row.user_id)">重置密码</el-button>
+            <el-button size="small" :type="row.user?.is_active ? 'danger' : 'success'" @click="toggleActive(row)">
+              {{ row.user?.is_active ? '禁用' : '启用' }}
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <el-pagination
+        v-if="total > 20"
+        v-model:current-page="page"
+        :total="total"
+        :page-size="20"
+        layout="prev, pager, next"
+        @current-change="loadTeachers"
+        class="pagination"
+      />
+    </el-card>
 
-    <!-- Add Teacher Dialog -->
-    <el-dialog v-model="showAddDialog" title="添加教师" width="420px">
+    <el-dialog v-model="showAddDialog" title="添加教师" width="420px" class="add-dialog">
       <el-form :model="teacherForm" label-width="80px">
         <el-form-item label="教师号">
-          <el-input v-model="teacherForm.teacher_no" />
+          <el-input v-model="teacherForm.teacher_no" placeholder="请输入教师号" />
         </el-form-item>
         <el-form-item label="姓名">
-          <el-input v-model="teacherForm.name" />
+          <el-input v-model="teacherForm.name" placeholder="请输入姓名" />
         </el-form-item>
         <el-form-item label="部门">
-          <el-input v-model="teacherForm.department" />
+          <el-input v-model="teacherForm.department" placeholder="请输入部门" />
         </el-form-item>
         <el-form-item label="密码">
-          <el-input v-model="teacherForm.password" show-password />
+          <el-input v-model="teacherForm.password" show-password placeholder="默认 123456" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -82,6 +86,7 @@
 /** 教师管理页 — 教师CRUD、管理员任命/撤销、账号启停、密码重置 */
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { Plus } from '@element-plus/icons-vue'
 import { teacherAPI, extractList, extractCount } from '../../api'
 
 const teachers = ref([])
@@ -167,9 +172,26 @@ onMounted(loadTeachers)
 </script>
 
 <style scoped>
-.teacher-manage { max-width: 960px; margin: 0 auto; }
-.toolbar { margin-bottom: 16px; }
-.search-bar { margin-bottom: 16px; }
+.teacher-manage { max-width: 960px; margin: 0 auto; animation: pageIn .4s ease; }
+.toolbar { margin-bottom: 18px; }
+.search-bar { margin-bottom: 18px; }
+.search-input :deep(.el-input__wrapper) {
+  border-radius: 8px; transition: all .3s;
+}
+.search-input :deep(.el-input__wrapper):hover {
+  box-shadow: 0 0 0 1px #1a1a2e inset;
+}
+.table-card {
+  border-radius: 12px; overflow: hidden;
+  animation: slideUp .5s ease;
+}
 .table { width: 100%; }
-.pagination { margin-top: 16px; text-align: center; }
+.pagination { margin-top: 18px; text-align: center; }
+
+.add-dialog :deep(.el-dialog) {
+  border-radius: 12px;
+}
+.add-dialog :deep(.el-dialog__header) {
+  border-bottom: 1px solid #f0f0f0; padding-bottom: 16px;
+}
 </style>

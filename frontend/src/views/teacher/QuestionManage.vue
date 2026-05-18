@@ -508,19 +508,32 @@ onMounted(async () => {
 
 <style scoped>
 .question-manage { max-width: 1100px; margin: 0 auto; }
-.toolbar { margin-bottom: 16px; display: flex; align-items: center; }
-.batch-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-.batch-left { display: flex; gap: 6px; }
-.batch-right { display: flex; align-items: center; gap: 8px; }
-.total-score { font-weight: 700; font-size: 16px; }
-.total-score.overflow { color: #f56c6c; }
-.table { width: 100%; margin-top: 8px; }
+.toolbar { margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+.batch-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.batch-left { display: flex; gap: 8px; }
+.batch-right { display: flex; align-items: center; gap: 10px; }
+.total-score {
+  font-weight: 700; font-size: 18px; padding: 4px 14px; border-radius: 20px;
+  background: #f0f9ff; color: #409eff;
+}
+.total-score.overflow {
+  background: #fef0f0; color: #f56c6c;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+.table { width: 100%; margin-top: 10px; }
 .no-deadline { color: #c0c4cc; }
-.grade-section { margin-bottom: 20px; }
-.grade-section-title { margin-bottom: 12px; padding-bottom: 6px; border-bottom: 2px solid #409eff; font-size: 15px; color: #303133; }
-.grade-question { margin-bottom: 16px; }
-.grade-question h5 { margin-bottom: 8px; font-size: 14px; }
-.grade-table { margin-bottom: 12px; }
+.grade-section { margin-bottom: 24px; }
+.grade-section-title {
+  margin-bottom: 14px; padding-bottom: 8px; border-bottom: 2px solid #11998e;
+  font-size: 16px; color: #303133; font-weight: 600;
+}
+.grade-question {
+  margin-bottom: 18px; padding: 14px; background: #fff; border-radius: 10px;
+  border: 1px solid #ebeef5; transition: all .3s ease;
+}
+.grade-question:hover { box-shadow: 0 3px 12px rgba(17,153,142,.08); }
+.grade-question h5 { margin-bottom: 10px; font-size: 14px; }
+.grade-table { margin-bottom: 14px; }
 .grade-section :deep(.el-table__body-wrapper) { max-height: 260px; overflow-y: auto; }
-.correct-ans { color: #67c23a; font-weight: 500; margin-left: 12px; }
+.correct-ans { color: #67c23a; font-weight: 600; margin-left: 14px; }
 </style>

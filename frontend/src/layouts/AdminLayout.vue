@@ -18,7 +18,7 @@
       </div>
     </el-header>
     <el-container class="main">
-      <el-aside width="200px" class="aside">
+      <el-aside width="260px" class="aside">
         <el-menu :default-active="activeMenu" router class="side-menu">
           <el-menu-item index="/admin/dashboard">
             <el-icon><Monitor /></el-icon>
@@ -66,11 +66,18 @@ onMounted(async () => {
 .layout { height: 100vh; }
 .header {
   display: flex; align-items: center; justify-content: space-between;
-  background: #fff; border-bottom: 1px solid #ebeef5; padding: 0 20px; height: 56px;
+  background: #1a1a2e;
+  padding: 0 24px; height: 56px; color: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,.25);
 }
-.header-left, .header-right { display: flex; align-items: center; gap: 12px; }
-.logo { font-size: 17px; font-weight: 600; color: #303133; }
-.aside { background: #fafafa; border-right: 1px solid #ebeef5; }
-.side-menu { border-right: none; height: 100%; background: transparent; }
-.content { padding: 20px; background: #f0f2f5; }
+.header-left, .header-right { display: flex; align-items: center; gap: 12px; color: #fff; }
+.logo { font-size: 17px; font-weight: 700; color: #fff; }
+.header-right .el-avatar { box-shadow: 0 0 0 2px rgba(255,255,255,.2); }
+.aside {
+  background: #fff; border-right: 1px solid #ebeef5;
+  box-shadow: 2px 0 8px rgba(0,0,0,.04);
+}
+.side-menu { border-right: none; height: 100%; background: transparent; padding-top: 8px; font-size: 16px; }
+.side-menu :deep(.el-menu-item) { font-size: 16px; height: 52px; line-height: 52px; }
+.content { padding: 24px; background: #f5f7fa; }
 </style>

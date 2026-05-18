@@ -316,20 +316,34 @@ onMounted(loadCourses)
 
 <style scoped>
 .course-manage { max-width: 960px; margin: 0 auto; }
-.toolbar { margin-bottom: 16px; }
-.course-card { margin-bottom: 16px; }
+.toolbar { margin-bottom: 20px; }
+.course-card {
+  margin-bottom: 20px; transition: all .3s ease;
+}
+.course-card:hover {
+  box-shadow: 0 4px 20px rgba(17,153,142,.1);
+}
 .course-header { display: flex; justify-content: space-between; align-items: center; }
-.course-name { font-size: 16px; font-weight: 600; }
+.course-name { font-size: 17px; font-weight: 700; color: #303133; }
 .course-actions { display: flex; gap: 8px; align-items: center; }
-.chapter-block { margin: 10px 0; padding: 12px; background: #f9fafc; border-radius: 8px; }
+.chapter-block {
+  margin: 10px 0; padding: 14px; background: #f9fafc; border-radius: 10px;
+  border: 1px solid #ebeef5; transition: all .3s ease;
+}
+.chapter-block:hover { background: #f0faf5; border-color: #d0e8d0; }
 .chapter-header {
   display: flex; justify-content: space-between; align-items: center;
-  font-weight: 600; margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px solid #ebeef5;
+  font-weight: 600; margin-bottom: 8px; padding-bottom: 8px;
+  border-bottom: 1px solid #ebeef5; color: #11998e;
 }
-.section-row { display: flex; justify-content: space-between; align-items: center; padding: 7px 12px; border-radius: 4px; }
-.section-row:hover { background: #ecf5ff; }
+.section-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 14px; border-radius: 8px; transition: all .2s ease;
+}
+.section-row:hover { background: #ecf5ff; transform: translateX(3px); }
 .section-title { display: flex; align-items: center; gap: 8px; }
-.section-actions { display: flex; gap: 4px; }
+.section-actions { display: flex; gap: 4px; opacity: .8; transition: opacity .2s ease; }
+.section-row:hover .section-actions { opacity: 1; }
 .existing-docs h4 { margin-bottom: 12px; font-size: 14px; color: #303133; }
 .doc-item { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid #f0f0f0; }
 .doc-item:last-child { border-bottom: none; }

@@ -27,7 +27,7 @@
       </div>
     </el-header>
     <el-container class="main">
-      <el-aside width="220px" class="aside">
+      <el-aside width="280px" class="aside">
         <el-menu :default-active="activeMenu" router class="side-menu">
           <el-menu-item index="/student/dashboard">
             <el-icon><Document /></el-icon>
@@ -166,25 +166,43 @@ onMounted(loadCourses)
 .layout { height: 100vh; }
 .header {
   display: flex; align-items: center; justify-content: space-between;
-  background: #fff; border-bottom: 1px solid #ebeef5; padding: 0 20px; height: 56px;
+  background: #3B82F6;
+  padding: 0 24px; height: 56px; color: #fff;
+  box-shadow: 0 2px 8px rgba(59,130,246,.25);
 }
 .header-left { display: flex; align-items: center; gap: 20px; }
-.logo { font-size: 18px; font-weight: 600; color: #303133; }
-.header-right { display: flex; align-items: center; gap: 12px; color: #606266; }
-.aside { background: #fafafa; border-right: 1px solid #ebeef5; overflow-y: auto; }
-.side-menu { border-right: none; background: transparent; }
-.course-list { padding: 12px; }
+.logo { font-size: 18px; font-weight: 700; color: #fff; }
+.header-left :deep(.el-breadcrumb__inner) { color: rgba(255,255,255,.85); font-weight: 400; }
+.header-left :deep(.el-breadcrumb__separator) { color: rgba(255,255,255,.6); }
+.header-right { display: flex; align-items: center; gap: 12px; color: #fff; }
+.header-right .el-avatar { box-shadow: 0 0 0 2px rgba(255,255,255,.3); }
+.aside {
+  background: #fff; border-right: 1px solid #ebeef5; overflow-y: auto;
+  box-shadow: 2px 0 8px rgba(0,0,0,.04);
+}
+.side-menu { border-right: none; background: transparent; padding-top: 8px; font-size: 16px; }
+.side-menu :deep(.el-menu-item) { font-size: 16px; height: 52px; line-height: 52px; }
+.course-list { padding: 16px; border-top: 1px solid #ebeef5; }
 .course-title {
-  font-size: 15px; font-weight: 600; padding: 10px 8px; cursor: pointer;
-  color: #303133; border-radius: 6px; margin-bottom: 4px;
+  font-size: 17px; font-weight: 600; padding: 14px 12px; cursor: pointer;
+  color: #303133; border-radius: 8px; margin-bottom: 6px;
+  transition: all .2s ease;
 }
-.course-title:hover { background: #e8f4ff; }
-.chapter-title { font-weight: 600; margin: 8px 0 4px 8px; font-size: 13px; color: #606266; }
+.course-title:hover { background: #eff6ff; color: #3B82F6; }
+.chapter-title {
+  font-weight: 600; margin: 10px 0 6px 12px; font-size: 15px; color: #606266;
+  transition: all .2s ease;
+}
 .section-item {
-  padding: 7px 12px; cursor: pointer; border-radius: 6px;
-  font-size: 13px; margin-left: 16px; color: #606266; transition: all .2s;
+  padding: 10px 16px; cursor: pointer; border-radius: 8px;
+  font-size: 15px; margin-left: 20px; color: #606266; transition: all .25s ease;
+  position: relative;
 }
-.section-item:hover { background: #e8f4ff; }
-.section-item.active { background: #409eff; color: #fff; font-weight: 500; }
-.content { padding: 20px; background: #f0f2f5; }
+.section-item:hover { background: #eff6ff; color: #3B82F6; }
+.section-item.active {
+  background: #3B82F6;
+  color: #fff; font-weight: 500;
+  box-shadow: 0 3px 10px rgba(59,130,246,.25);
+}
+.content { padding: 24px; background: #f5f7fa; }
 </style>
