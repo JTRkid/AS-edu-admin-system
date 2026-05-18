@@ -1,21 +1,30 @@
 #!/bin/bash
 # ============================================================
-# 实验评分脚本 - 在虚拟机中运行，对学生实验进行评分
-# 评分完成后通过 HTTP POST 将成绩发送到教学平台
+#  实验评分脚本模板
+#  在虚拟机中运行，对学生实验进行自动化评分
+#  评分完成后通过 HTTP POST 将成绩发送到教学平台
 # ============================================================
 
-# ---------- 配置区 ----------
-# 教学平台地址
-PLATFORM_URL="http://127.0.0.1:8000"
-# 和服务器上 settings.py 里的 SCORING_MACHINE_API_KEY 一致
-API_KEY="scoring-machine-secret-key-2026"  
+# ============================================================
+# >>> 部署时需要修改的配置区 <<<
+# ============================================================
 
-# 章节信息（固定）
-CHAPTER_NO=1
-CHAPTER_NAME="Python基础"
-SECTION_NO=1
-SECTION_NAME="Python简介与环境搭建"
-COURSE_NAME="Python程序设计"
+# 【必改】教学平台后端地址（含端口）
+PLATFORM_URL="http://127.0.0.1:8000"
+
+# 【必改】API 密钥，需与平台 settings.py 中的 SCORING_MACHINE_API_KEY 一致
+API_KEY="scoring-machine-secret-key-2026"
+
+# 【必改】课程信息 — 需与平台上创建的课程/章/节对应
+COURSE_NAME="Python程序设计"      # 课程名称（用于多课程场景精确匹配）
+CHAPTER_NO=1                       # 章序号
+CHAPTER_NAME="Python基础"           # 章名称
+SECTION_NO=1                        # 节序号
+SECTION_NAME="Python简介与环境搭建"  # 节名称
+
+# ============================================================
+# >>> 以下为评分逻辑，根据实验要求修改 <<<
+# ============================================================
 
 # ---------- 从键盘读取学生信息 ----------
 echo "========================================"
@@ -30,69 +39,70 @@ echo ""
 
 # ---------- 评分逻辑 ----------
 SCORE=0
+TOTAL=0  # 总分值，根据评分项数量累加
 DETAILS=""
 
+# ============================================================
+# 评分项示例 — 按需增删改
+# 每个评分项结构:
+#   1. 输出检查进度
+#   2. 执行检查逻辑
+#   3. 根据结果累加 SCORE 和 TOTAL
+#   4. 拼接 DETAILS 详情字符串
+# ============================================================
+
 # --- 评分项1: 检查文件是否存在 ---
-echo "[1/5] 检查实验文件..."
-if [ -f "./hello.py" ]; then
-    SCORE=$((SCORE + 20))
-    DETAILS="${DETAILS}文件检查通过(+20); "
-    echo "  [通过] hello.py 存在 (+20)"
+# 【按需修改】检查的文件名
+CHECK_FILE="hello.py"
+echo "[1/2] 检查实验文件 ${CHECK_FILE}..."
+TOTAL=$((TOTAL + 50))
+if [ -f "./${CHECK_FILE}" ]; then
+    SCORE=$((SCORE + 50))
+    DETAILS="${DETAILS}${CHECK_FILE}存在(+50); "
+    echo "  [通过] ${CHECK_FILE} 存在 (+50)"
 else
-    DETAILS="${DETAILS}文件检查失败: hello.py 不存在; "
-    echo "  [失败] hello.py 不存在"
+    DETAILS="${DETAILS}${CHECK_FILE}不存在; "
+    echo "  [失败] ${CHECK_FILE} 不存在"
 fi
 
-# --- 评分项2: 检查语法是否正确 ---
-echo "[2/5] 检查Python语法..."
-if python3 -m py_compile hello.py 2>/dev/null; then
-    SCORE=$((SCORE + 20))
-    DETAILS="${DETAILS}语法检查通过(+20); "
-    echo "  [通过] 语法正确 (+20)"
+# --- 评分项2: 运行脚本检查输出 ---
+# 【按需修改】执行的命令和期望的关键词
+RUN_CMD="python3 hello.py"
+EXPECT_KEYWORD="Hello"
+echo "[2/2] 运行脚本检查输出..."
+TOTAL=$((TOTAL + 50))
+OUTPUT=$(${RUN_CMD} 2>&1)
+if echo "$OUTPUT" | grep -q "${EXPECT_KEYWORD}"; then
+    SCORE=$((SCORE + 50))
+    DETAILS="${DETAILS}输出包含'${EXPECT_KEYWORD}'(+50); "
+    echo "  [通过] 输出包含 '${EXPECT_KEYWORD}' (+50)"
 else
-    DETAILS="${DETAILS}语法检查失败; "
-    echo "  [失败] 语法错误"
+    DETAILS="${DETAILS}输出不包含'${EXPECT_KEYWORD}'; "
+    echo "  [失败] 输出不包含 '${EXPECT_KEYWORD}'"
 fi
 
-# --- 评分项3: 运行脚本检查输出 ---
-echo "[3/5] 运行脚本检查输出..."
-OUTPUT=$(python3 hello.py 2>&1)
-if echo "$OUTPUT" | grep -q "Hello"; then
-    SCORE=$((SCORE + 20))
-    DETAILS="${DETAILS}输出包含Hello(+20); "
-    echo "  [通过] 输出包含 'Hello' (+20)"
-else
-    DETAILS="${DETAILS}输出不包含Hello; "
-    echo "  [失败] 输出不包含 'Hello'"
-fi
+# ============================================================
+# 新增评分项模板（复制以下代码块，修改对应内容即可）
+# ============================================================
+#
+# echo "[N/总数] 检查项描述..."
+# TOTAL=$((TOTAL + 分值))
+# if [ 条件 ]; then
+#     SCORE=$((SCORE + 分值))
+#     DETAILS="${DETAILS}检查项描述(+分值); "
+#     echo "  [通过] 检查项描述 (+分值)"
+# else
+#     DETAILS="${DETAILS}检查项描述(失败); "
+#     echo "  [失败] 检查项描述"
+# fi
+#
+# ============================================================
 
-# --- 评分项4: 检查代码风格 ---
-echo "[4/5] 检查代码风格..."
-LINE_COUNT=$(wc -l < hello.py 2>/dev/null || echo 0)
-if [ "$LINE_COUNT" -ge 3 ]; then
-    SCORE=$((SCORE + 20))
-    DETAILS="${DETAILS}代码行数>=3(+20); "
-    echo "  [通过] 代码行数 ${LINE_COUNT} >= 3 (+20)"
-else
-    DETAILS="${DETAILS}代码行数不足; "
-    echo "  [失败] 代码行数 ${LINE_COUNT} < 3"
-fi
 
-# --- 评分项5: 加分项 ---
-echo "[5/5] 检查加分项..."
-if [ -f "./README.md" ]; then
-    SCORE=$((SCORE + 20))
-    DETAILS="${DETAILS}包含README.md(+20); "
-    echo "  [通过] 包含 README.md (+20)"
-else
-    DETAILS="${DETAILS}无README.md; "
-    echo "  [跳过] 无 README.md"
-fi
-
-# ---------- 发送成绩到平台 ----------
+# ---------- 发送成绩到平台（无需修改） ----------
 echo ""
 echo "========================================"
-echo "  评分完成，总分: ${SCORE}"
+echo "  评分完成，总分: ${SCORE}/${TOTAL}"
 echo "  正在发送成绩到教学平台..."
 echo "========================================"
 
@@ -132,5 +142,5 @@ else
 fi
 
 echo ""
-echo "最终成绩: ${SCORE}/100"
+echo "最终成绩: ${SCORE}/${TOTAL}"
 exit 0
