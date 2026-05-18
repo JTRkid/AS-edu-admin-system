@@ -1,8 +1,11 @@
+"""WebSocket Consumer — 成绩更新实时推送"""
+
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 
 
 class ScoreConsumer(AsyncWebsocketConsumer):
+    """成绩更新 WebSocket Consumer，按 user_id 分组推送成绩变更"""
     async def connect(self):
         self.user = self.scope.get('user')
         if self.user and self.user.is_authenticated:

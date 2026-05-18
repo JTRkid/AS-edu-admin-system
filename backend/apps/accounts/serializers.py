@@ -1,3 +1,5 @@
+"""用户与账号序列化器 — 登录/密码/学生/教师/验证码/分组/操作日志"""
+
 import re
 import bcrypt
 from datetime import datetime, timedelta
@@ -9,6 +11,7 @@ from .models import User, Student, Teacher, StudentGroup, VerifyCode, OperationL
 
 
 class LoginSerializer(serializers.Serializer):
+    """登录序列化器，支持学号/教师号 + bcrypt密码认证"""
     account = serializers.CharField(max_length=20)
     password = serializers.CharField(max_length=128)
 
@@ -45,6 +48,7 @@ class LoginSerializer(serializers.Serializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    """用户序列化器（仅安全字段）"""
     role = serializers.CharField(read_only=True)
 
     class Meta:
@@ -53,6 +57,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class StudentSerializer(serializers.ModelSerializer):
+    """学生序列化器（含关联 User 信息）"""
     user = UserSerializer(read_only=True)
     name = serializers.CharField(source='user.name', read_only=True)
 
@@ -62,6 +67,7 @@ class StudentSerializer(serializers.ModelSerializer):
 
 
 class StudentCreateSerializer(serializers.ModelSerializer):
+    """学生创建序列化器，验证学号13位数字、班级9位数字"""
     name = serializers.CharField(max_length=50)
     password = serializers.CharField(max_length=128, write_only=True)
 
@@ -100,6 +106,7 @@ class StudentCreateSerializer(serializers.ModelSerializer):
 
 
 class TeacherSerializer(serializers.ModelSerializer):
+    """教师序列化器（含关联 User 信息）"""
     user = UserSerializer(read_only=True)
     name = serializers.CharField(source='user.name', read_only=True)
 
@@ -109,6 +116,7 @@ class TeacherSerializer(serializers.ModelSerializer):
 
 
 class TeacherCreateSerializer(serializers.ModelSerializer):
+    """教师创建序列化器"""
     name = serializers.CharField(max_length=50)
     password = serializers.CharField(max_length=128, write_only=True)
 
@@ -140,6 +148,7 @@ class TeacherCreateSerializer(serializers.ModelSerializer):
 
 
 class ChangePasswordSerializer(serializers.Serializer):
+    """修改密码序列化器"""
     old_password = serializers.CharField(max_length=128)
     new_password = serializers.CharField(max_length=128)
 
@@ -149,49 +158,8 @@ class ChangePasswordSerializer(serializers.Serializer):
         return value
 
 
-class ResetPasswordSerializer(serializers.Serializer):
-    phone = serializers.CharField(max_length=20)
-    verify_code = serializers.CharField(max_length=10)
-    new_password = serializers.CharField(max_length=128)
-    confirm_password = serializers.CharField(max_length=128)
-
-    def validate(self, attrs):
-        if attrs['new_password'] != attrs['confirm_password']:
-            raise serializers.ValidationError('两次密码输入不一致')
-        if len(attrs['new_password']) < 6:
-            raise serializers.ValidationError('密码长度不能少于6位')
-
-        # Verify code
-        code = VerifyCode.objects.filter(
-            phone=attrs['phone'],
-            code=attrs['verify_code'],
-            used=False,
-            expires_at__gt=timezone.now(),
-        ).first()
-
-        if not code:
-            raise serializers.ValidationError('验证码无效或已过期')
-        if code.attempt_count >= 3:
-            raise serializers.ValidationError('验证码尝试次数已达上限')
-
-        code.attempt_count += 1
-        code.save()
-
-        # Find user by phone
-        user = User.objects.filter(phone=attrs['phone'], phone_verified=True).first()
-        if not user:
-            raise serializers.ValidationError('该手机号未绑定账号')
-
-        # Check new password != old password
-        if bcrypt.checkpw(attrs['new_password'].encode('utf-8'), user.password.encode('utf-8')):
-            raise serializers.ValidationError('新密码不能与旧密码相同')
-
-        attrs['user'] = user
-        attrs['code_obj'] = code
-        return attrs
-
-
 class PhoneBindSerializer(serializers.Serializer):
+    """手机号绑定序列化器"""
     phone = serializers.CharField(max_length=20)
     verify_code = serializers.CharField(max_length=10)
 
@@ -204,6 +172,7 @@ class PhoneBindSerializer(serializers.Serializer):
 
 
 class StudentGroupSerializer(serializers.ModelSerializer):
+    """学生分组序列化器"""
     class Meta:
         model = StudentGroup
         fields = ['id', 'name', 'teacher', 'created_at']
@@ -211,6 +180,7 @@ class StudentGroupSerializer(serializers.ModelSerializer):
 
 
 class OperationLogSerializer(serializers.ModelSerializer):
+    """操作日志序列化器"""
     user_name = serializers.CharField(source='user.name', read_only=True)
 
     class Meta:

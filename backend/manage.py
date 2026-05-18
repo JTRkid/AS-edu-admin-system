@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Django's command-line utility for administrative tasks."""
+"""Django 命令行管理入口，用于 runserver / migrate / shell 等操作"""
 import os
 import sys
 

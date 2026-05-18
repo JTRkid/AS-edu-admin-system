@@ -1,8 +1,11 @@
+"""成绩模型定义，支持总成绩/实验成绩两种类型，含修改审计历史"""
+
 from django.db import models
 from django.conf import settings
 
 
 class Score(models.Model):
+    """成绩模型，唯一约束为 (student, section, score_type)，支持自动/手动/导入/实验四种来源"""
     SOURCE_CHOICES = (
         ('auto_script', '自动评分'),
         ('manual', '手动录入'),
@@ -55,6 +58,7 @@ class Score(models.Model):
 
 
 class ScoreHistory(models.Model):
+    """成绩修改历史模型，记录每次分数变更前后的值和修改人"""
     score_record = models.ForeignKey(
         Score, on_delete=models.CASCADE, related_name='history', verbose_name='成绩记录'
     )

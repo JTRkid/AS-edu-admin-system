@@ -70,8 +70,10 @@
 </template>
 
 <script setup>
+/** 管理员仪表盘 — 系统状态概览、各模块数据统计、最近操作日志 */
 import { ref, reactive, onMounted } from 'vue'
 import api, { extractCount, extractList } from '../../api'
+import { formatTime } from '../../utils/constants'
 
 const stats = reactive({ students: 0, teachers: 0, admins: 0, courses: 0, chapters: 0, sections: 0, scores: 0, submissions: 0, documents: 0 })
 const logs = ref([])
@@ -105,8 +107,6 @@ async function refreshLogs() {
     logs.value = extractList(res).slice(0, 10)
   } catch (e) { /* ignore */ }
 }
-
-function formatTime(t) { return t ? new Date(t).toLocaleString('zh-CN') : '' }
 
 onMounted(() => { loadStats(); refreshLogs() })
 </script>

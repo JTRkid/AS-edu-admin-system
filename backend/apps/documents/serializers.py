@@ -1,8 +1,11 @@
+"""文档序列化器"""
+
 from rest_framework import serializers
 from .models import Document
 
 
 class DocumentSerializer(serializers.ModelSerializer):
+    """文档序列化器，包含上传者姓名和完整文件URL"""
     uploaded_by_name = serializers.CharField(source='uploaded_by.name', read_only=True)
     file_url = serializers.SerializerMethodField()
 

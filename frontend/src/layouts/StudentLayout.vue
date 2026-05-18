@@ -2,7 +2,7 @@
   <el-container class="layout">
     <el-header class="header">
       <div class="header-left">
-        <span class="logo">教学平台</span>
+        <span class="logo">AS-edu-system</span>
         <el-breadcrumb separator=">">
           <el-breadcrumb-item>{{ courseName || '课程' }}</el-breadcrumb-item>
           <el-breadcrumb-item v-if="activeSection">
@@ -19,6 +19,7 @@
           <el-avatar :size="32" icon="UserFilled" />
           <template #dropdown>
             <el-dropdown-menu>
+              <el-dropdown-item @click="showChangePwd = true">修改密码</el-dropdown-item>
               <el-dropdown-item @click="handleLogout">退出登录</el-dropdown-item>
             </el-dropdown-menu>
           </template>
@@ -27,6 +28,16 @@
     </el-header>
     <el-container class="main">
       <el-aside width="220px" class="aside">
+        <el-menu :default-active="activeMenu" router class="side-menu">
+          <el-menu-item index="/student/dashboard">
+            <el-icon><Document /></el-icon>
+            <span>课程学习</span>
+          </el-menu-item>
+          <el-menu-item index="/student/scores">
+            <el-icon><Trophy /></el-icon>
+            <span>我的成绩</span>
+          </el-menu-item>
+        </el-menu>
         <div class="course-list">
           <div v-for="course in courses" :key="course.id" class="course-group">
             <div class="course-title" @click="toggleCourse(course)">{{ course.name }}</div>
@@ -49,23 +60,31 @@
         </div>
       </el-aside>
       <el-main class="content">
-        <Dashboard :active-section="activeSection" :course-id="currentCourseId" />
+        <router-view v-slot="{ Component }">
+          <component :is="Component" :active-section="activeSection" :course-id="currentCourseId" />
+        </router-view>
       </el-main>
     </el-container>
+
+    <ChangePassword v-model="showChangePwd" />
   </el-container>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+/** 学生端布局 — 顶部导航（课程选择/面包屑/用户头像）+ 侧边栏（文档/问答切换） */
+import { ref, computed, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { courseAPI } from '../api'
 import { extractList } from '../api'
-import Dashboard from '../views/student/Dashboard.vue'
-
+import ChangePassword from '../components/ChangePassword.vue'
 const router = useRouter()
+const route = useRoute()
 const authStore = useAuthStore()
 const user = authStore.user
+
+const activeMenu = computed(() => route.path)
+const showChangePwd = ref(false)
 
 const courses = ref([])
 const activeSection = ref(null)
@@ -132,6 +151,7 @@ function selectSection(section, course) {
   activeSection.value = section
   courseName.value = course.name
   currentCourseId.value = course.id
+  if (route.path !== '/student/dashboard') router.push('/student/dashboard')
 }
 
 function handleLogout() {
@@ -152,6 +172,7 @@ onMounted(loadCourses)
 .logo { font-size: 18px; font-weight: 600; color: #303133; }
 .header-right { display: flex; align-items: center; gap: 12px; color: #606266; }
 .aside { background: #fafafa; border-right: 1px solid #ebeef5; overflow-y: auto; }
+.side-menu { border-right: none; background: transparent; }
 .course-list { padding: 12px; }
 .course-title {
   font-size: 15px; font-weight: 600; padding: 10px 8px; cursor: pointer;

@@ -2,7 +2,7 @@
   <el-container class="layout">
     <el-header class="header">
       <div class="header-left">
-        <span class="logo">教学平台 · 教师端</span>
+        <span class="logo">AS-edu-system · 教师端</span>
       </div>
       <div class="header-right">
         <span>{{ user?.name }}</span>
@@ -10,6 +10,7 @@
           <el-avatar :size="32" icon="UserFilled" />
           <template #dropdown>
             <el-dropdown-menu>
+              <el-dropdown-item @click="showChangePwd = true">修改密码</el-dropdown-item>
               <el-dropdown-item @click="handleLogout">退出登录</el-dropdown-item>
             </el-dropdown-menu>
           </template>
@@ -41,21 +42,28 @@
         <router-view />
       </el-main>
     </el-container>
+
+    <ChangePassword v-model="showChangePwd" />
   </el-container>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+/** 教师端布局 — 顶部导航 + 侧边栏（课程/题目/学生/成绩管理） */
+// TODO: 与 AdminLayout.vue 脚本部分完全相同（>90%重复），建议抽取为通用布局组件
+import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
-
+import ChangePassword from '../components/ChangePassword.vue'
 const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
 const user = authStore.user
 const activeMenu = computed(() => route.path)
-
+const showChangePwd = ref(false)
 function handleLogout() { authStore.logout(); router.push('/login') }
+onMounted(async () => {
+  await authStore.fetchUser()
+})
 </script>
 
 <style scoped>

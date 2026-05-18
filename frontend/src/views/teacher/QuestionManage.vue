@@ -211,11 +211,13 @@
 </template>
 
 <script setup>
+/** 题目管理页 — 题目CRUD、发布/撤回、批量操作、教师批改、总分校验 */
 import { ref, reactive, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { courseAPI, sectionAPI, questionAPI } from '../../api'
 import { extractList } from '../../api'
+import { optionLetters, typeMap } from '../../utils/constants'
 import api from '../../api'
 
 const route = useRoute()
@@ -232,9 +234,6 @@ const optionList = ref([])
 const correctAnswerArr = ref([])
 const tableRef = ref(null)
 const selectedQuestions = ref([])
-
-const optionLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')
-const typeMap = { single: '单选题', multiple: '多选题', judgment: '判断题', essay: '简答题' }
 
 const form = reactive({ type: 'single', title: '', content: '', correct_answer: '', max_score: 100, deadline: null, allow_resubmit: true })
 

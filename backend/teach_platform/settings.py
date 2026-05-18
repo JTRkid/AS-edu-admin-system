@@ -1,13 +1,18 @@
+"""Django 项目配置文件 — 数据库、JWT、CORS、Channels 等"""
+
 import os
 from datetime import timedelta
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# WARNING: 生产环境请更换为强随机密钥并移出代码仓库
 SECRET_KEY = 'django-insecure-teach-platform-secret-key-change-in-production-2026'
 
+# WARNING: 生产环境必须设为 False
 DEBUG = True
 
+# WARNING: 生产环境应限制为实际域名
 ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
@@ -65,6 +70,7 @@ WSGI_APPLICATION = 'teach_platform.wsgi.application'
 ASGI_APPLICATION = 'teach_platform.asgi.application'
 
 # Database - MySQL
+# WARNING: 生产环境禁止硬编码数据库密码，应使用环境变量
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -100,6 +106,7 @@ MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # CORS
+# WARNING: 生产环境应限制为实际前端域名，而非允许所有来源
 CORS_ALLOW_ALL_ORIGINS = True
 
 # REST Framework
@@ -128,6 +135,7 @@ SIMPLE_JWT = {
 }
 
 # Channels
+# WARNING: InMemoryChannelLayer 仅适用于开发/单进程，生产环境应使用 Redis
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels.layers.InMemoryChannelLayer',
@@ -135,4 +143,5 @@ CHANNEL_LAYERS = {
 }
 
 # Scoring machine API key
+# WARNING: 生产环境应使用强随机密钥并通过环境变量注入
 SCORING_MACHINE_API_KEY = 'scoring-machine-secret-key-2026'

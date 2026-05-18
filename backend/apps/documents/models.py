@@ -1,8 +1,11 @@
+"""文档上传与版本管理模型定义"""
+
 from django.db import models
 from django.conf import settings
 
 
 class Document(models.Model):
+    """文档模型，支持文件上传、版本号和可见性控制"""
     section = models.ForeignKey(
         'courses.Section', on_delete=models.CASCADE, related_name='documents', verbose_name='所属节'
     )

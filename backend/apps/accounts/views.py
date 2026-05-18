@@ -1,3 +1,5 @@
+"""用户认证与管理视图 — 登录/验证码、学生/教师CRUD、操作日志"""
+
 import bcrypt
 from datetime import datetime, timedelta
 from django.utils import timezone
@@ -10,12 +12,13 @@ from .models import User, Student, Teacher, StudentGroup, VerifyCode, OperationL
 from .serializers import (
     LoginSerializer, UserSerializer, StudentSerializer, StudentCreateSerializer,
     TeacherSerializer, TeacherCreateSerializer, ChangePasswordSerializer,
-    ResetPasswordSerializer, PhoneBindSerializer, StudentGroupSerializer,
+    PhoneBindSerializer, StudentGroupSerializer,
     OperationLogSerializer,
 )
 
 
 def get_tokens_for_user(user):
+    """为用户生成 JWT access_token 和 refresh_token"""
     refresh = RefreshToken.for_user(user)
     return {
         'access_token': str(refresh.access_token),
@@ -24,11 +27,13 @@ def get_tokens_for_user(user):
 
 
 class LoginViewSet(viewsets.ViewSet):
+    """登录与密码相关接口，无需认证即可访问"""
     authentication_classes = []
     permission_classes = [permissions.AllowAny]
 
     @action(methods=['post'], detail=False)
     def login(self, request):
+        """用户登录，返回 JWT token 和角色信息"""
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
@@ -59,30 +64,6 @@ class LoginViewSet(viewsets.ViewSet):
             'code': 200,
             'message': '登录成功',
             'data': {**tokens, 'user': user_data},
-        })
-
-    @action(methods=['post'], detail=False)
-    def reset_password(self, request):
-        serializer = ResetPasswordSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data['user']
-        code = serializer.validated_data['code_obj']
-
-        # Hash new password with bcrypt
-        hashed = bcrypt.hashpw(
-            serializer.validated_data['new_password'].encode('utf-8'),
-            bcrypt.gensalt()
-        ).decode('utf-8')
-        user.password = hashed
-        user.save()
-
-        # Mark code as used
-        code.used = True
-        code.save()
-
-        return Response({
-            'code': 200,
-            'message': '密码重置成功',
         })
 
     @action(methods=['post'], detail=False)
@@ -406,6 +387,7 @@ class TeacherViewSet(viewsets.ModelViewSet):
 
 
 class StudentGroupViewSet(viewsets.ModelViewSet):
+    """学生分组管理ViewSet，自动关联当前教师"""
     queryset = StudentGroup.objects.all()
     serializer_class = StudentGroupSerializer
 
@@ -414,5 +396,6 @@ class StudentGroupViewSet(viewsets.ModelViewSet):
 
 
 class OperationLogViewSet(viewsets.ReadOnlyModelViewSet):
+    """操作日志只读ViewSet，按时间倒序展示"""
     queryset = OperationLog.objects.select_related('user').all().order_by('-created_at')
     serializer_class = OperationLogSerializer

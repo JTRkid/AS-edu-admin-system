@@ -25,9 +25,11 @@
 </template>
 
 <script setup>
+/** 操作日志页 — 分页展示管理员/教师操作记录 */
 import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import api from '../../api'
+import api, { extractList, extractCount } from '../../api'
+import { formatTime } from '../../utils/constants'
 
 const logs = ref([])
 const loading = ref(false)
@@ -38,18 +40,13 @@ async function loadLogs() {
   loading.value = true
   try {
     const res = await api.get('/auth/logs/', { params: { page: page.value } })
-    logs.value = res.data || res.results || []
-    if (res.count !== undefined) total.value = res.count
+    logs.value = extractList(res)
+    total.value = extractCount(res)
   } catch (e) {
     ElMessage.error('加载日志失败')
   } finally {
     loading.value = false
   }
-}
-
-function formatTime(t) {
-  if (!t) return ''
-  return new Date(t).toLocaleString('zh-CN')
 }
 
 onMounted(loadLogs)

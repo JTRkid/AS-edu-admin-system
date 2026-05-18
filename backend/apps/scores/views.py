@@ -1,3 +1,5 @@
+"""成绩管理视图 — 成绩CRUD、Excel导入导出、实验成绩提交API"""
+
 import io
 import openpyxl
 from django.conf import settings
@@ -14,6 +16,7 @@ from .serializers import ScoreSerializer, ScoreSubmitSerializer
 
 
 class ScoreViewSet(viewsets.ModelViewSet):
+    """成绩管理ViewSet，支持总成绩/实验成绩分类筛选、手动修改审计、Excel导入导出"""
     queryset = Score.objects.select_related('student', 'section', 'modified_by').all()
     serializer_class = ScoreSerializer
     filterset_fields = ['section', 'chapter_no', 'section_no', 'class_name', 'source', 'score_type']
@@ -129,7 +132,6 @@ class ScoreViewSet(viewsets.ModelViewSet):
                 continue
 
             try:
-                from apps.courses.models import Section
                 section = Section.objects.filter(
                     chapter__chapter_no=chapter_no, section_no=section_no
                 ).first()
@@ -137,7 +139,6 @@ class ScoreViewSet(viewsets.ModelViewSet):
                     errors.append(f'第{row_idx}行: 章{chapter_no}节{section_no}不存在')
                     continue
 
-                from apps.accounts.models import Student
                 student = Student.objects.filter(student_no=student_no).first()
                 if not student:
                     errors.append(f'第{row_idx}行 {student_no}: 学生不存在，跳过')
@@ -180,6 +181,7 @@ class ScoreViewSet(viewsets.ModelViewSet):
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])
 def score_submit_api(request):
+    """实验评分机提交成绩API，使用 ApiKey 认证，自动创建或覆盖实验成绩"""
     auth_header = request.headers.get('Authorization', '')
     if auth_header != f"ApiKey {settings.SCORING_MACHINE_API_KEY}":
         return Response({'code': 403, 'message': '无权限'}, status=403)
@@ -193,25 +195,28 @@ def score_submit_api(request):
     except Student.DoesNotExist:
         return Response({'code': 404, 'message': '学生不存在'}, status=404)
 
-    try:
-        section = Section.objects.select_related('chapter__course').get(
-            chapter__chapter_no=data['chapter_no'], section_no=data['section_no'],
-        )
-    except Section.DoesNotExist:
+    course_name = data.get('course_name', '')
+    section_qs = Section.objects.select_related('chapter__course').filter(
+        chapter__chapter_no=data['chapter_no'], section_no=data['section_no'],
+    )
+    if course_name:
+        section_qs = section_qs.filter(chapter__course__name=course_name)
+    section = section_qs.first()
+    if not section:
         return Response({'code': 404, 'message': f"章{data['chapter_no']}节{data['section_no']}不存在"}, status=404)
-    except Section.MultipleObjectsReturned:
-        return Response({'code': 400, 'message': '匹配到多个节，请确认章节信息'}, status=400)
 
     existing = Score.objects.filter(student=student.user, section=section).first()
     is_overwrite = existing is not None
 
     if existing:
+        # FIXME: original_score 应在覆盖前保存旧值，此处 existing.score 已被赋为新值
+        old_score = existing.score
         existing.score = data['score']
         existing.score_type = 'experiment'
         existing.source = 'experiment'
         existing.evaluator = data.get('evaluator', '')
         existing.details = str(data.get('details', ''))
-        existing.original_score = existing.score
+        existing.original_score = old_score
         existing.save()
         score_record = existing
     else:

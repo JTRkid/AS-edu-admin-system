@@ -61,6 +61,7 @@
 </template>
 
 <script setup>
+/** 学生管理页 — 学生CRUD、Excel批量导入导出、班级筛选、重置密码 */
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { studentAPI, extractList, extractCount, downloadFile } from '../../api'

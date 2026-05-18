@@ -1,7 +1,10 @@
+"""题目模型定义，支持单选题/多选题/判断题/简答题四种题型"""
+
 from django.db import models
 
 
 class Question(models.Model):
+    """题目模型，关联到具体的节，支持四种题型和自动评分"""
     TYPE_CHOICES = (
         ('single', '单选题'),
         ('multiple', '多选题'),

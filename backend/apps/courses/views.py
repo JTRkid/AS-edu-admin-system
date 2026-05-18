@@ -1,3 +1,5 @@
+"""课程管理视图 — 课程/章/节CRUD、树结构、激活节切换"""
+
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -9,6 +11,7 @@ from .serializers import (
 
 
 class CourseViewSet(viewsets.ModelViewSet):
+    """课程ViewSet，自动关联当前教师为授课教师"""
     queryset = Course.objects.prefetch_related('chapters__sections').all()
     serializer_class = CourseSerializer
     filterset_fields = ['status']
@@ -43,6 +46,7 @@ class CourseViewSet(viewsets.ModelViewSet):
 
 
 class ChapterViewSet(viewsets.ModelViewSet):
+    """章ViewSet，支持按课程和可见性筛选"""
     queryset = Chapter.objects.all()
     serializer_class = ChapterSerializer
     filterset_fields = ['course', 'is_visible']
@@ -55,6 +59,7 @@ class ChapterViewSet(viewsets.ModelViewSet):
 
 
 class SectionViewSet(viewsets.ModelViewSet):
+    """节ViewSet，支持激活节切换和当前激活节查询"""
     queryset = Section.objects.all()
     serializer_class = SectionSerializer
     filterset_fields = ['chapter', 'is_active', 'is_visible']

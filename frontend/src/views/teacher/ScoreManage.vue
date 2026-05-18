@@ -125,6 +125,7 @@
 </template>
 
 <script setup>
+/** 成绩管理页 — 总成绩/实验成绩切换、手动录入、Excel导入导出、修改审计 */
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { scoreAPI, studentAPI, sectionAPI, extractList, extractCount, downloadFile } from '../../api'

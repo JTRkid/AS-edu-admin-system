@@ -1,8 +1,11 @@
+"""答案提交模型定义"""
+
 from django.db import models
 from django.conf import settings
 
 
 class Submission(models.Model):
+    """答案提交模型，记录学生对某道题的作答内容和提交时间"""
     student = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name='学生'
     )

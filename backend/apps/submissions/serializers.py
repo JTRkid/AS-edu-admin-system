@@ -1,9 +1,13 @@
+"""答案提交序列化器"""
+
 from rest_framework import serializers
 from .models import Submission
 
 
 class SubmissionSerializer(serializers.ModelSerializer):
+    """提交记录序列化器，包含学生姓名和学号"""
     student_name = serializers.CharField(source='student.name', read_only=True)
+    # TODO: get_student_no 对每条序列化记录执行一次 DB 查询，存在 N+1 问题
     student_no = serializers.SerializerMethodField()
 
     class Meta:
@@ -20,6 +24,7 @@ class SubmissionSerializer(serializers.ModelSerializer):
 
 
 class SubmissionCreateSerializer(serializers.ModelSerializer):
+    """创建提交的序列化器，自动注入当前用户和客户端IP"""
     class Meta:
         model = Submission
         fields = ['question', 'section', 'answer', 'language']

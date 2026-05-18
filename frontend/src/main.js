@@ -1,3 +1,5 @@
+/** Vue 应用入口 — 挂载 Pinia、Router、ElementPlus（中文）、所有图标 */
+
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import ElementPlus from 'element-plus'

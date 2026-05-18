@@ -1,3 +1,5 @@
+"""答案提交管理视图 — 提交CRUD、截止时间/重复提交控制"""
+
 from django.utils import timezone
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
@@ -8,6 +10,7 @@ from .serializers import SubmissionSerializer, SubmissionCreateSerializer
 
 
 class SubmissionViewSet(viewsets.ModelViewSet):
+    """答案提交ViewSet，学生只能查看自己的提交，支持重新提交（覆盖旧答案）"""
     queryset = Submission.objects.select_related('student', 'question').all()
     filterset_fields = ['section', 'question', 'student']
 
@@ -16,6 +19,8 @@ class SubmissionViewSet(viewsets.ModelViewSet):
             return SubmissionCreateSerializer
         return SubmissionSerializer
 
+    # FIXME: perform_create 的截止时间和重复提交检查永远不会执行，
+    # 因为 create() 方法已覆盖了全部逻辑，perform_create 仅在 create 末尾被调用一次
     def perform_create(self, serializer):
         # Check deadline
         question = serializer.validated_data.get('question')

@@ -1,3 +1,5 @@
+/** 路由配置 — 基于角色的路由守卫，学生/教师/管理员三套布局 */
+
 import { createRouter, createWebHistory } from 'vue-router'
 
 const routes = [
@@ -14,6 +16,7 @@ const routes = [
     children: [
       { path: '', redirect: '/student/dashboard' },
       { path: 'dashboard', name: 'StudentDashboard', component: () => import('../views/student/Dashboard.vue') },
+      { path: 'scores', name: 'StudentScores', component: () => import('../views/student/MyScores.vue') },
     ],
   },
   {
@@ -48,6 +51,7 @@ const router = createRouter({
   routes,
 })
 
+/** 全局路由守卫：检查登录状态和角色权限，未登录跳转/login，无权限跳转/login */
 router.beforeEach((to, from, next) => {
   const token = sessionStorage.getItem('access_token')
   const user = JSON.parse(sessionStorage.getItem('user') || 'null')

@@ -1,8 +1,11 @@
+"""用户、学生、教师、验证码、操作日志模型定义"""
+
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 
 class User(AbstractUser):
+    """自定义用户模型，支持管理员/教师/学生三种角色"""
     ROLE_CHOICES = (
         ('admin', '管理员'),
         ('teacher', '教师'),
@@ -26,6 +29,7 @@ class User(AbstractUser):
 
 
 class Student(models.Model):
+    """学生信息模型，通过 OneToOneField 关联 User"""
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     student_no = models.CharField(max_length=20, unique=True, verbose_name='学号')
     class_name = models.CharField(max_length=50, verbose_name='班级')
@@ -43,6 +47,7 @@ class Student(models.Model):
 
 
 class StudentGroup(models.Model):
+    """学生分组模型，由教师创建和管理"""
     name = models.CharField(max_length=50, verbose_name='分组名称')
     teacher = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='所属教师')
     created_at = models.DateTimeField(auto_now_add=True)
@@ -57,6 +62,7 @@ class StudentGroup(models.Model):
 
 
 class Teacher(models.Model):
+    """教师信息模型，通过 OneToOneField 关联 User"""
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     teacher_no = models.CharField(max_length=20, unique=True, verbose_name='教师号')
     department = models.CharField(max_length=50, blank=True, null=True, verbose_name='所属部门')
@@ -72,6 +78,7 @@ class Teacher(models.Model):
 
 
 class VerifyCode(models.Model):
+    """短信验证码模型，记录发送和校验状态"""
     phone = models.CharField(max_length=20, verbose_name='手机号')
     code = models.CharField(max_length=10, verbose_name='验证码')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
@@ -86,6 +93,7 @@ class VerifyCode(models.Model):
 
 
 class OperationLog(models.Model):
+    """操作日志模型，记录用户关键操作"""
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='操作人')
     action = models.CharField(max_length=50, verbose_name='操作类型')
     target = models.CharField(max_length=255, blank=True, verbose_name='操作对象')

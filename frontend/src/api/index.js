@@ -1,8 +1,12 @@
+/** API 层 — Axios 实例、拦截器、辅助函数、所有后端 API 封装 */
+
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
 
+const BASE_URL = 'http://localhost:8000/api/v1'
+
 const api = axios.create({
-  baseURL: 'http://localhost:8000/api/v1',
+  baseURL: BASE_URL,
   timeout: 15000,
 })
 
@@ -55,7 +59,7 @@ api.interceptors.response.use(
 
 export default api
 
-// 统一提取列表数据的辅助函数（兼容分页/非分页/包装格式）
+/** 从后端响应中提取列表数据，兼容分页(res.results)、包装(res.data)、数组三种格式 */
 export function extractList(res, fallback = []) {
   if (Array.isArray(res)) return res
   if (res?.results) return res.results
@@ -64,6 +68,7 @@ export function extractList(res, fallback = []) {
   return fallback
 }
 
+/** 从后端响应中提取数据总数，支持分页(res.count)和直接数组两种格式 */
 export function extractCount(res) {
   if (res?.count !== undefined) return res.count
   if (res?.data?.count !== undefined) return res.data.count
@@ -71,10 +76,10 @@ export function extractCount(res) {
   return list.length
 }
 
-// 带认证的文件下载辅助函数
+/** 带 JWT 认证的文件下载，通过 fetch + Blob 方式触发浏览器下载 */
 export async function downloadFile(url, filename) {
   const token = sessionStorage.getItem('access_token')
-  const res = await fetch(`http://127.0.0.1:8000/api/v1${url}`, {
+  const res = await fetch(`${BASE_URL}${url}`, {
     headers: { Authorization: `Bearer ${token}` },
   })
   if (!res.ok) throw new Error('下载失败')
@@ -89,7 +94,6 @@ export async function downloadFile(url, filename) {
 // Auth APIs
 export const authAPI = {
   login: (data) => api.post('/auth/login/', data),
-  resetPassword: (data) => api.post('/auth/password/reset/', data),
   sendVerifyCode: (data) => api.post('/auth/verify-code/send/', data),
   getMe: () => api.get('/auth/user/me/'),
   changePassword: (data) => api.put('/auth/user/change-password/', data),

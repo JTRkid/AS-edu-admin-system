@@ -1,3 +1,5 @@
+"""WSGI 入口 — 传统 HTTP 部署入口"""
+
 import os
 from django.core.wsgi import get_wsgi_application
 

@@ -1,21 +1,29 @@
+"""题目管理视图 — 题目CRUD、发布/撤回、教师批改、成绩汇总"""
+
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db import models as db_models
+from django.db.models import Sum
+from django.utils.dateparse import parse_datetime
 from .models import Question
 from .serializers import QuestionSerializer
 from apps.submissions.models import Submission
 from apps.submissions.serializers import SubmissionSerializer
 from apps.scores.models import Score
+from apps.accounts.models import Student
+from apps.courses.models import Section
 
 
 class QuestionViewSet(viewsets.ModelViewSet):
+    """题目管理ViewSet，支持批量操作（发布/撤回/截止/删除）、教师批改和成绩生成"""
     queryset = Question.objects.all()
     serializer_class = QuestionSerializer
     filterset_fields = ['section', 'type', 'is_published']
     ordering_fields = ['order_num', 'created_at']
 
     def perform_create(self, serializer):
+        """自动分配 order_num 为当前节已有题目数+1"""
         section_id = serializer.validated_data.get('section').id if serializer.validated_data.get('section') else None
         if section_id:
             max_order = Question.objects.filter(section_id=section_id).aggregate(
@@ -105,7 +113,6 @@ class QuestionViewSet(viewsets.ModelViewSet):
                 score = manual_score
 
             # 创建或更新成绩记录
-            from apps.accounts.models import Student
             try:
                 student_profile = Student.objects.get(user=sub.student)
             except Student.DoesNotExist:
@@ -180,7 +187,6 @@ class QuestionViewSet(viewsets.ModelViewSet):
         deadline = request.data.get('deadline')
         if not ids:
             return Response({'code': 400, 'message': '请提供题目ID列表'}, status=400)
-        from django.utils.dateparse import parse_datetime
         dt = parse_datetime(deadline) if deadline else None
         Question.objects.filter(id__in=ids).update(deadline=dt)
         return Response({'code': 200, 'message': f'已为{len(ids)}道题目设置截止时间'})
@@ -200,7 +206,6 @@ class QuestionViewSet(viewsets.ModelViewSet):
         section_id = request.query_params.get('section')
         if not section_id:
             return Response({'code': 400, 'message': '请提供节ID'}, status=400)
-        from django.db.models import Sum
         total = Question.objects.filter(section_id=section_id).aggregate(
             s=Sum('max_score')
         )['s'] or 0
@@ -214,9 +219,6 @@ class QuestionViewSet(viewsets.ModelViewSet):
 
         if not section_id or not grades:
             return Response({'code': 400, 'message': '请提供节ID和成绩数据'}, status=400)
-
-        from apps.courses.models import Section
-        from apps.accounts.models import Student
 
         try:
             section = Section.objects.get(id=section_id)

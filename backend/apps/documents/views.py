@@ -1,3 +1,5 @@
+"""文档管理视图 — 上传、替换（版本号递增）、可见性切换"""
+
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -6,6 +8,7 @@ from .serializers import DocumentSerializer
 
 
 class DocumentViewSet(viewsets.ModelViewSet):
+    """文档ViewSet，支持PDF文档上传、版本管理和可见性控制"""
     queryset = Document.objects.select_related('uploaded_by').all()
     serializer_class = DocumentSerializer
     filterset_fields = ['section', 'is_visible']
@@ -14,6 +17,12 @@ class DocumentViewSet(viewsets.ModelViewSet):
         file = self.request.FILES.get('file')
         file_size = file.size if file else 0
         serializer.save(uploaded_by=self.request.user, file_size=file_size)
+
+    def perform_destroy(self, instance):
+        """删除数据库记录的同时删除服务器上的物理文件"""
+        if instance.file:
+            instance.file.delete(save=False)
+        instance.delete()
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
@@ -28,6 +37,9 @@ class DocumentViewSet(viewsets.ModelViewSet):
         if not file:
             return Response({'code': 400, 'message': '请上传文件'}, status=400)
 
+        # Delete old file from storage
+        if document.file:
+            document.file.delete(save=False)
         document.file = file
         document.file_size = file.size
         document.version += 1

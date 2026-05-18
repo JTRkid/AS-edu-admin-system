@@ -1,8 +1,11 @@
+"""课程-章-节三级结构模型定义"""
+
 from django.db import models
 from django.conf import settings
 
 
 class Course(models.Model):
+    """课程模型，由教师创建和管理"""
     STATUS_CHOICES = (
         ('draft', '草稿'),
         ('active', '已发布'),
@@ -26,6 +29,7 @@ class Course(models.Model):
 
 
 class Chapter(models.Model):
+    """章模型，隶属于某个课程，包含多个节"""
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='chapters', verbose_name='所属课程')
     chapter_no = models.IntegerField(verbose_name='章序号')
     title = models.CharField(max_length=100, verbose_name='章标题')
@@ -44,6 +48,7 @@ class Chapter(models.Model):
 
 
 class Section(models.Model):
+    """节模型，隶属于某个章，可设置答题时间窗口和激活状态"""
     chapter = models.ForeignKey(Chapter, on_delete=models.CASCADE, related_name='sections', verbose_name='所属章')
     section_no = models.IntegerField(verbose_name='节序号')
     title = models.CharField(max_length=100, verbose_name='节标题')

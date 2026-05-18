@@ -1,3 +1,5 @@
+"""测试数据填充脚本 — 创建课程、章、节和题目，用于开发和演示"""
+
 import os, sys
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'teach_platform.settings')
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -6,8 +8,22 @@ django.setup()
 
 from apps.courses.models import Course, Chapter, Section
 from apps.questions.models import Question as Q
-from apps.accounts.models import User
+from apps.accounts.models import User, Teacher
 from django.db.models import Sum
+import bcrypt
+
+# 默认管理员账号
+admin_pw = bcrypt.hashpw('123456'.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+admin, created = User.objects.update_or_create(
+    username='admin',
+    defaults={'name': '管理员', 'password': admin_pw, 'role': 'admin', 'is_staff': True, 'is_superuser': True},
+)
+Teacher.objects.update_or_create(
+    user=admin,
+    defaults={'teacher_no': 'admin', 'department': '管理部', 'is_admin': True},
+)
+if created:
+    print('默认管理员账号已创建 (admin / 123456)')
 
 teacher = User.objects.get(username='t001')
 

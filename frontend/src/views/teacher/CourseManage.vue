@@ -107,6 +107,7 @@
 </template>
 
 <script setup>
+/** 课程管理页 — 课程/章/节三级树结构CRUD、文档上传管理 */
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'

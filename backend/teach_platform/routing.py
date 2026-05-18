@@ -1,3 +1,5 @@
+"""WebSocket 路由配置"""
+
 from django.urls import re_path
 from apps.scores.consumers import ScoreConsumer
 

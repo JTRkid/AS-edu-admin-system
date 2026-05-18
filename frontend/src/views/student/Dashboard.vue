@@ -106,9 +106,11 @@
 </template>
 
 <script setup>
+/** 学生仪表盘 — 当前激活节文档查看/题目作答/答案提交 */
 import { ref, reactive, watch, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import { documentAPI, questionAPI, submissionAPI, extractList } from '../../api'
+import { optionLetters, typeMap, formatTime } from '../../utils/constants'
 
 const props = defineProps({ activeSection: Object, courseId: Number })
 
@@ -121,11 +123,7 @@ const answers = reactive({})
 const multiAnswers = reactive({})
 const submitted = reactive({})
 
-const optionLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')
-const typeMap = {
-  single: '单选题', multiple: '多选题', judgment: '判断题', essay: '简答题',
-}
-
+/** 将相对路径或 localhost URL 统一转为 127.0.0.1 绝对路径 */
 function fixUrl(raw) {
   if (!raw) return ''
   let url = raw

@@ -79,9 +79,10 @@
 </template>
 
 <script setup>
+/** 教师管理页 — 教师CRUD、管理员任命/撤销、账号启停、密码重置 */
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { teacherAPI } from '../../api'
+import { teacherAPI, extractList, extractCount } from '../../api'
 
 const teachers = ref([])
 const loading = ref(false)
@@ -100,8 +101,8 @@ async function loadTeachers() {
     const params = { page: page.value }
     if (searchKey.value) params.search = searchKey.value
     const res = await teacherAPI.list(params)
-    teachers.value = res.data || res.results || []
-    if (res.count !== undefined) total.value = res.count
+    teachers.value = extractList(res)
+    total.value = extractCount(res)
   } catch (e) {
     ElMessage.error('加载教师列表失败')
   } finally {

@@ -6,29 +6,31 @@
 
 # ---------- 配置区 ----------
 # 教学平台地址
-PLATFORM_URL="http://192.168.1.100:8000"
-API_KEY="scoring-machine-secret-key-2026"
+PLATFORM_URL="http://127.0.0.1:8000"
+# 和服务器上 settings.py 里的 SCORING_MACHINE_API_KEY 一致
+API_KEY="scoring-machine-secret-key-2026"  
 
-# 学生信息（由教师预先配置在该脚本中，或从环境变量读取）
-STUDENT_NO="${STUDENT_NO:-2023001}"
-STUDENT_NAME="${STUDENT_NAME:-张三}"
-CLASS_NAME="${CLASS_NAME:-计算机1班}"
+# 章节信息（固定）
+CHAPTER_NO=1
+CHAPTER_NAME="Python基础"
+SECTION_NO=1
+SECTION_NAME="Python简介与环境搭建"
+COURSE_NAME="Python程序设计"
 
-# 章节信息
-CHAPTER_NO="${CHAPTER_NO:-1}"
-CHAPTER_NAME="${CHAPTER_NAME:-Python基础}"
-SECTION_NO="${SECTION_NO:-1}"
-SECTION_NAME="${SECTION_NAME:-Python简介}"
+# ---------- 从键盘读取学生信息 ----------
+echo "========================================"
+echo "  实验评分脚本"
+echo "  章节: 第${CHAPTER_NO}章 ${SECTION_NO}节 - ${SECTION_NAME}"
+echo "========================================"
+echo ""
+read -p "请输入学号: " STUDENT_NO
+read -p "请输入姓名: " STUDENT_NAME
+read -p "请输入班级: " CLASS_NAME
+echo ""
 
 # ---------- 评分逻辑 ----------
 SCORE=0
 DETAILS=""
-
-echo "========================================"
-echo "  实验评分脚本"
-echo "  学生: ${STUDENT_NO} ${STUDENT_NAME}"
-echo "  章节: 第${CHAPTER_NO}章 ${SECTION_NO}节"
-echo "========================================"
 
 # --- 评分项1: 检查文件是否存在 ---
 echo "[1/5] 检查实验文件..."
@@ -94,21 +96,29 @@ echo "  评分完成，总分: ${SCORE}"
 echo "  正在发送成绩到教学平台..."
 echo "========================================"
 
+# 将 JSON 写入临时文件以避免中文编码问题
+JSON_FILE=$(mktemp)
+cat > "$JSON_FILE" <<JSONEOF
+{
+    "student_no": "${STUDENT_NO}",
+    "student_name": "${STUDENT_NAME}",
+    "class_name": "${CLASS_NAME}",
+    "course_name": "${COURSE_NAME}",
+    "chapter_no": ${CHAPTER_NO},
+    "section_no": ${SECTION_NO},
+    "chapter_name": "${CHAPTER_NAME}",
+    "section_name": "${SECTION_NAME}",
+    "score": ${SCORE},
+    "evaluator": "exp-script-v1",
+    "details": "${DETAILS}"
+}
+JSONEOF
+
 RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "${PLATFORM_URL}/api/v1/scores/submit/" \
     -H "Authorization: ApiKey ${API_KEY}" \
-    -H "Content-Type: application/json" \
-    -d "{
-        \"student_no\": \"${STUDENT_NO}\",
-        \"student_name\": \"${STUDENT_NAME}\",
-        \"class_name\": \"${CLASS_NAME}\",
-        \"chapter_no\": ${CHAPTER_NO},
-        \"section_no\": ${SECTION_NO},
-        \"chapter_name\": \"${CHAPTER_NAME}\",
-        \"section_name\": \"${SECTION_NAME}\",
-        \"score\": ${SCORE},
-        \"evaluator\": \"exp-script-v1\",
-        \"details\": \"${DETAILS}\"
-    }")
+    -H "Content-Type: application/json; charset=utf-8" \
+    --data-binary "@${JSON_FILE}")
+rm -f "$JSON_FILE"
 
 HTTP_CODE=$(echo "$RESPONSE" | tail -1)
 BODY=$(echo "$RESPONSE" | sed '$d')
