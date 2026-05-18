@@ -17,7 +17,11 @@
             </el-radio-group>
           </div>
           <div v-if="currentDoc" class="doc-area">
-            <iframe :src="currentDoc" class="pdf-viewer" />
+            <div v-if="docLoading" class="doc-loading">
+              <el-icon :size="40" class="is-loading"><Loading /></el-icon>
+              <p>文档加载中...</p>
+            </div>
+            <iframe :src="currentDoc" class="pdf-viewer" @load="docLoading = false" />
           </div>
           <el-empty v-else description="暂无文档" />
           <div v-if="docList.length > 0" class="download-cards">
@@ -109,6 +113,7 @@
 /** 学生仪表盘 — 当前激活节文档查看/题目作答/答案提交 */
 import { ref, reactive, watch, computed } from 'vue'
 import { ElMessage } from 'element-plus'
+import { Loading } from '@element-plus/icons-vue'
 import { documentAPI, questionAPI, submissionAPI, extractList } from '../../api'
 import { optionLetters, typeMap, formatTime } from '../../utils/constants'
 
@@ -118,19 +123,21 @@ const activeTab = ref('doc')
 const currentDoc = ref(null)
 const currentDocIndex = ref(0)
 const docList = ref([])
+const docLoading = ref(false)
 const questions = ref([])
 const answers = reactive({})
 const multiAnswers = reactive({})
 const submitted = reactive({})
 
-/** 将相对路径或 localhost URL 统一转为 127.0.0.1 绝对路径 */
+/** 将后端返回的相对路径转为可用 URL — 生产环境走 Nginx 代理，开发环境直连 8000 */
 function fixUrl(raw) {
   if (!raw) return ''
-  let url = raw
-  if (!url.startsWith('http')) {
-    url = `http://127.0.0.1:8000${url}`
+  if (raw.startsWith('http')) return raw
+  // 开发环境 localhost 时走 8000 端口，生产环境用相对路径走 Nginx
+  if (window.location.hostname === 'localhost') {
+    return `http://127.0.0.1:8000${raw}`
   }
-  return url.replace('localhost', '127.0.0.1')
+  return raw
 }
 
 function setCurrentDoc() {
@@ -143,6 +150,7 @@ function setCurrentDoc() {
 
 function onDocSwitch(idx) {
   currentDocIndex.value = idx
+  docLoading.value = true
   setCurrentDoc()
 }
 
@@ -196,6 +204,7 @@ async function loadSectionData() {
     const docs = extractList(docRes)
     docList.value = docs
     if (docs.length > 0) {
+      docLoading.value = true
       setCurrentDoc()
     }
 
@@ -248,8 +257,13 @@ watch(() => props.activeSection, () => {
 .dashboard { max-width: 960px; margin: 0 auto; }
 .card-header { display: flex; justify-content: space-between; align-items: center; }
 .doc-tabs { margin-bottom: 12px; }
-.doc-area { height: 78vh; }
-.pdf-viewer { width: 100%; height: 100%; border: none; border-radius: 8px; }
+.doc-area { height: 78vh; position: relative; }
+.doc-loading {
+  position: absolute; inset: 0; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; background: #fafafa;
+  border-radius: 8px; z-index: 1; color: #909399; gap: 12px;
+}
+.pdf-viewer { width: 100%; height: 100%; border: none; border-radius: 8px; position: relative; z-index: 2; }
 .q-options { display: flex; flex-direction: column; gap: 8px; margin: 10px 0; }
 .option-item { margin-left: 8px; transition: all .2s ease; }
 .option-item:hover { color: #667eea; }

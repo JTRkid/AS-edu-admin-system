@@ -311,6 +311,15 @@ sudo systemctl start nginx
 sudo systemctl enable nginx
 ```
 
+**全局性能优化（编辑 `/etc/nginx/nginx.conf`，在 `http` 块中添加）：**
+
+```nginx
+sendfile on;
+tcp_nopush on;
+gzip on;
+gzip_types text/plain text/css application/json application/javascript text/xml application/xml;
+```
+
 验证：
 
 ```bash
@@ -542,6 +551,8 @@ server {
     listen 80;
     server_name 你的域名或服务器IP;
 
+    client_max_body_size 300M;
+
     # 前端静态文件
     location / {
         root /home/AS-edu-admin-system/frontend/dist;
@@ -560,11 +571,14 @@ server {
     # 后端静态文件 (Django collectstatic)
     location /static/ {
         alias /home/AS-edu-admin-system/backend/staticfiles/;
+        expires 30d;
+        add_header Cache-Control "public, immutable";
     }
 
     # 用户上传文件
     location /media/ {
         alias /home/AS-edu-admin-system/backend/media/;
+        add_header Cache-Control "public, max-age=86400";
     }
 
     # WebSocket 反向代理
