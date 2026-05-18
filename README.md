@@ -336,7 +336,7 @@ git --version       # 2.x+
 ## 一、从 GitHub 拉取代码
 
 ```bash
-cd /opt
+cd /home
 git clone https://github.com/JTRkid/AS-edu-admin-system.git
 cd AS-edu-admin-system
 ```
@@ -531,7 +531,7 @@ server {
 
     # 前端静态文件
     location / {
-        root /opt/AS-edu-admin-system/frontend/dist;
+        root /home/AS-edu-admin-system/frontend/dist;
         index index.html;
         try_files $uri $uri/ /index.html;
     }
@@ -546,12 +546,12 @@ server {
 
     # 后端静态文件 (Django collectstatic)
     location /static/ {
-        alias /opt/AS-edu-admin-system/backend/staticfiles/;
+        alias /home/AS-edu-admin-system/backend/staticfiles/;
     }
 
     # 用户上传文件
     location /media/ {
-        alias /opt/AS-edu-admin-system/backend/media/;
+        alias /home/AS-edu-admin-system/backend/media/;
     }
 
     # WebSocket 反向代理
@@ -596,9 +596,9 @@ After=network.target mysql.service redis.service
 [Service]
 User=root
 Group=root
-WorkingDirectory=/opt/AS-edu-admin-system/backend
-EnvironmentFile=/opt/AS-edu-admin-system/backend/teach_platform/.env
-ExecStart=/opt/AS-edu-admin-system/backend/venv/bin/gunicorn teach_platform.wsgi:application \
+WorkingDirectory=/home/AS-edu-admin-system/backend
+EnvironmentFile=/home/AS-edu-admin-system/backend/teach_platform/.env
+ExecStart=/home/AS-edu-admin-system/backend/venv/bin/gunicorn teach_platform.wsgi:application \
     --bind 127.0.0.1:8000 \
     --workers 4 \
     --timeout 120 \
@@ -627,9 +627,9 @@ After=network.target mysql.service redis.service
 [Service]
 User=root
 Group=root
-WorkingDirectory=/opt/AS-edu-admin-system/backend
-EnvironmentFile=/opt/AS-edu-admin-system/backend/teach_platform/.env
-ExecStart=/opt/AS-edu-admin-system/backend/venv/bin/daphne \
+WorkingDirectory=/home/AS-edu-admin-system/backend
+EnvironmentFile=/home/AS-edu-admin-system/backend/teach_platform/.env
+ExecStart=/home/AS-edu-admin-system/backend/venv/bin/daphne \
     -b 127.0.0.1 -p 8001 \
     teach_platform.asgi:application
 Restart=always
@@ -681,7 +681,7 @@ sudo systemctl stop as-edu-daphne
 代码更新后执行以下步骤：
 
 ```bash
-cd /opt/AS-edu-admin-system
+cd /home/AS-edu-admin-system
 git pull
 
 # 后端
@@ -707,7 +707,7 @@ npm run build
 
 ```bash
 # 1. 拉取代码
-cd /opt
+cd /home
 git clone https://github.com/JTRkid/AS-edu-admin-system.git
 cd AS-edu-admin-system
 
