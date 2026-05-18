@@ -201,7 +201,7 @@ npm --version     # 应输出 9.x.x 或更高
 **Ubuntu：**
 
 ```bash
-sudo apt install -y mysql-server
+sudo apt install -y mysql-server pkg-config libmysqlclient-dev
 
 # 启动并设置开机自启
 sudo systemctl start mysql
@@ -216,11 +216,11 @@ sudo mysql_secure_installation
 ```bash
 # CentOS 7
 sudo yum install -y https://dev.mysql.com/get/mysql80-community-release-el7-3.noarch.rpm
-sudo yum install -y mysql-community-server
+sudo yum install -y mysql-community-server pkgconfig mysql-devel
 
 # CentOS 8/9
 sudo dnf install -y https://dev.mysql.com/get/mysql80-community-release-el8-1.noarch.rpm
-sudo dnf install -y mysql-community-server
+sudo dnf install -y mysql-community-server pkgconfig mysql-devel
 
 # 启动
 sudo systemctl start mysqld
