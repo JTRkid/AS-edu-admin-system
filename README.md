@@ -166,17 +166,17 @@ echo "source /opt/rh/rh-python38/enable" >> ~/.bashrc
 sudo dnf install -y python3 python3-pip python3-devel
 ```
 
-### 0.3 安装 Node.js 18+
+### 0.3 安装 Node.js 20+
 
 **方法一：NodeSource 官方源（推荐，Ubuntu & CentOS 通用）**
 
 ```bash
 # Ubuntu / Debian
-curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 sudo apt install -y nodejs
 
 # CentOS / RHEL
-curl -fsSL https://rpm.nodesource.com/setup_18.x | sudo bash -
+curl -fsSL https://rpm.nodesource.com/setup_20.x | sudo bash -
 sudo yum install -y nodejs
 ```
 
@@ -185,15 +185,15 @@ sudo yum install -y nodejs
 ```bash
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
 source ~/.bashrc
-nvm install 18
-nvm use 18
+nvm install 20
+nvm use 20
 ```
 
 验证：
 
 ```bash
-node --version    # 应输出 v18.x.x
-npm --version     # 应输出 9.x.x 或更高
+node --version    # 应输出 v20.x.x
+npm --version     # 应输出 10.x.x 或更高
 ```
 
 ### 0.4 安装 MySQL 8.0+
@@ -207,9 +207,14 @@ sudo apt install -y mysql-server pkg-config libmysqlclient-dev
 sudo systemctl start mysql
 sudo systemctl enable mysql
 
-# 运行安全配置（设置 root 密码、删除匿名用户等）
+# 运行安全配置
 sudo mysql_secure_installation
+
+# 如果 mysql_secure_installation 未提示设置密码（Ubuntu 默认 auth_socket 认证），手动修改密码
+sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '你的数据库密码'; FLUSH PRIVILEGES;"
 ```
+
+> 记下上面设置的密码，后续 `.env` 文件中 `DB_PASSWORD` 需要填写此密码。
 
 **CentOS：**
 
@@ -229,7 +234,12 @@ sudo systemctl enable mysqld
 # 获取临时密码
 sudo grep 'temporary password' /var/log/mysqld.log
 sudo mysql_secure_installation
+
+# 如果未提示设置密码，手动修改
+sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '你的数据库密码'; FLUSH PRIVILEGES;"
 ```
+
+> 记下上面设置的密码，后续 `.env` 文件中 `DB_PASSWORD` 需要填写此密码。
 
 验证：
 
@@ -372,7 +382,7 @@ python3 -c "import secrets; print(secrets.token_urlsafe(50))"
 
 ```bash
 # 手动创建
-vim backend/teach_platform/.env
+sudo vim teach_platform/.env
 ```
 
 `.env` 文件内容（**根据实际情况修改**）：
@@ -449,9 +459,12 @@ mysql -u root -p
 
 ```sql
 CREATE DATABASE teach_platform CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE USER '你的用户名'@'localhost' IDENTIFIED BY '你的密码';
-GRANT ALL PRIVILEGES ON teach_platform.* TO '你的用户名'@'localhost';
-FLUSH PRIVILEGES;
+
+-- 如果直接用 root 账号，只需建库即可，下面两行不需要
+-- 如果创建了独立数据库用户，取消下面注释并修改用户名密码
+-- CREATE USER '你的用户名'@'localhost' IDENTIFIED BY '你的密码';
+-- GRANT ALL PRIVILEGES ON teach_platform.* TO '你的用户名'@'localhost';
+-- FLUSH PRIVILEGES;
 EXIT;
 ```
 
@@ -481,7 +494,7 @@ python seed_data.py
 ### 3.1 安装依赖
 
 ```bash
-cd frontend
+cd ../frontend
 npm install
 ```
 
@@ -723,7 +736,7 @@ pip install -r requirements.txt
 pip install gunicorn channels_redis
 
 # 4. 创建 .env 配置文件（按实际情况修改）
-vim teach_platform/.env
+sudo vim teach_platform/.env
 
 # 5. 数据库
 mysql -u root -p <<SQL

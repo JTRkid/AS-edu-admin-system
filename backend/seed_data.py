@@ -25,7 +25,18 @@ Teacher.objects.update_or_create(
 if created:
     print('默认管理员账号已创建 (admin / 123456)')
 
-teacher = User.objects.get(username='t001')
+# 创建默认教师账号（不存在则创建）
+teacher_pw = bcrypt.hashpw('123456'.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+teacher, _ = User.objects.get_or_create(
+    username='t001',
+    defaults={'name': '默认教师', 'password': teacher_pw, 'role': 'teacher'},
+)
+_, teacher_created = Teacher.objects.get_or_create(
+    user=teacher,
+    defaults={'teacher_no': 't001', 'department': '计算机系'},
+)
+if teacher_created:
+    print('默认教师账号已创建 (t001 / 123456)')
 
 # === Course 1 ===
 c1 = Course.objects.create(name='Python程序设计', teacher=teacher, description='零基础学习Python编程', status='active')
